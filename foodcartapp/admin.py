@@ -7,6 +7,7 @@ from .models import Product
 from .models import ProductCategory
 from .models import Restaurant
 from .models import RestaurantMenuItem
+from .models import Order, OrderItem
 
 
 class RestaurantMenuItemInline(admin.TabularInline):
@@ -104,3 +105,17 @@ class ProductAdmin(admin.ModelAdmin):
 @admin.register(ProductCategory)
 class ProductAdmin(admin.ModelAdmin):
     pass
+
+
+class OrderItemInline(admin.TabularInline):
+    model = OrderItem
+    extra = 1
+
+
+@admin.register(Order)
+class OrderAdmin(admin.ModelAdmin):
+    list_display = ['address', 'phonenumber', 'is_closed']
+    list_editable = ['is_closed']
+    inlines = [OrderItemInline]
+    readonly_fields = ['created_at']
+    list_filter = ['is_closed']
