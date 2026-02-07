@@ -21,10 +21,14 @@
 
     {% for item in order_items %}
       <tr>
-        <td>-</td>
-        <td>-</td>
-        <td>-</td>
-        <td>-</td>
+        <td>{{item.id}}</td>
+        {% if item.lastname %}
+        <td>{{item.firstname}} {{item.lastname}}</td>
+        {% else %}
+        <td>{{item.firstname}}</td>
+        {% endif %}
+        <td>{{item.phonenumber}}</td>       
+        <td>{{item.address}}</td>
       </tr>
     {% endfor %}
    </table>
