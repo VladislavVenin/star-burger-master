@@ -1,6 +1,8 @@
 from django.http import JsonResponse
 from django.templatetags.static import static
 import json
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
 
 
 from .models import Product, Order, OrderItem
@@ -58,11 +60,12 @@ def product_list_api(request):
     })
 
 
+@api_view(['POST'])
 def register_order(request):
     try:
-        data = json.loads(request.body)
+        data = request.data
     except json.JSONDecodeError:
-        return JsonResponse({"error": "Invalid JSON"}, status=400)
+        return Response({"error": "Invalid JSON"}, status=400)
     order = Order.objects.create(
         address=data["address"],
         firstname=data["firstname"],
@@ -73,11 +76,11 @@ def register_order(request):
         try:
             order_item = Product.objects.get(id=product["product"])
         except Product.DoesNotExist:
-            return JsonResponse({"error": "No such product with this id"}, status=400)
+            return Response({"error": "No such product with this id"}, status=400)
 
         OrderItem.objects.create(
             product=order_item,
             order=order,
             quantity=product["quantity"],
         )
-    return JsonResponse({"status": "ok", "data": data})
+    return Response({"status": "ok", "data": data})
