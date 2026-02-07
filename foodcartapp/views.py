@@ -1,9 +1,12 @@
 from django.http import JsonResponse
 from django.templatetags.static import static
 import json
+
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-
+import phonenumbers
+from phonenumbers import is_valid_number
+from phonenumbers.phonenumberutil import NumberParseException
 
 from .models import Product, Order, OrderItem
 
@@ -67,8 +70,32 @@ def register_order(request):
     except json.JSONDecodeError:
         return Response({"error": "Invalid JSON"}, status=400)
 
-    if type(data["products"]) is not list or not data.get("products"):
-        return Response({"error": "The product list is empty or not a list."}, status=400)
+    fields = [
+        "products",
+        "firstname",
+        "phonenumber",
+        "address",
+    ]
+    errors = {}
+
+    for field in fields:
+        if not data.get(field):
+            errors[f"{field}"] = f"The {field} field is missing or empty."
+    if errors:
+        return Response({"error": errors}, status=400)
+
+    if not isinstance(data["products"], list):
+        return Response({"error": "The products list is not a list."}, status=400)
+
+    if not isinstance(data["firstname"], str):
+        return Response({"error": "Firstname is not a valid string."}, status=400)
+
+    try:
+        phonenumber = phonenumbers.parse(data["phonenumber"], "RU")
+    except NumberParseException:
+        return Response({"error": "Invalid phone number"}, status=400)
+    if not is_valid_number(phonenumber):
+        return Response({"error": "Invalid phone number"}, status=400)
 
     order = Order.objects.create(
         address=data["address"],
@@ -80,7 +107,8 @@ def register_order(request):
         try:
             order_item = Product.objects.get(id=product["product"])
         except Product.DoesNotExist:
-            return Response({"error": "No such product with this id"}, status=400)
+            order.delete()
+            return Response({"error": "No product with such id"}, status=404)
 
         OrderItem.objects.create(
             product=order_item,
