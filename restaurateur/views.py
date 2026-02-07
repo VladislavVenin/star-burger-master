@@ -92,7 +92,7 @@ def view_restaurants(request):
 
 @user_passes_test(is_manager, login_url='restaurateur:login')
 def view_orders(request):
-    orders = Order.objects.values('id', 'firstname', 'lastname', 'phonenumber', 'address').all()
+    orders = Order.objects.get_price()
     context = {
         "order_items": orders,
     }
