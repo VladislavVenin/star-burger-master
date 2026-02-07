@@ -66,6 +66,10 @@ def register_order(request):
         data = request.data
     except json.JSONDecodeError:
         return Response({"error": "Invalid JSON"}, status=400)
+
+    if type(data["products"]) is not list or not data.get("products"):
+        return Response({"error": "The product list is empty or not a list."}, status=400)
+
     order = Order.objects.create(
         address=data["address"],
         firstname=data["firstname"],
