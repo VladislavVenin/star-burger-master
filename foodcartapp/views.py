@@ -3,10 +3,10 @@ from django.templatetags.static import static
 import json
 
 from rest_framework.decorators import api_view
+from rest_framework.serializers import ModelSerializer
+from rest_framework.serializers import ValidationError
+from rest_framework.serializers import ListField
 from rest_framework.response import Response
-import phonenumbers
-from phonenumbers import is_valid_number
-from phonenumbers.phonenumberutil import NumberParseException
 
 from .models import Product, Order, OrderItem
 
@@ -63,55 +63,47 @@ def product_list_api(request):
     })
 
 
+class OrderItemSerializer(ModelSerializer):
+    class Meta:
+        model = OrderItem
+        fields = ['product', 'quantity',]
+
+
+class OrderSerializer(ModelSerializer):
+    products = ListField(
+        child=OrderItemSerializer()
+    )
+
+    class Meta:
+        model = Order
+        fields = ['products', 'address', 'firstname', 'lastname', 'phonenumber',]
+
+    def validate_products(self, products):
+        if not products:
+            raise ValidationError("The products list is empty")
+        return products
+
+
+
 @api_view(['POST'])
 def register_order(request):
     try:
         data = request.data
     except json.JSONDecodeError:
-        return Response({"error": "Invalid JSON"}, status=400)
+        raise ValidationError({"error": "Invalid JSON"})
 
-    fields = [
-        "products",
-        "firstname",
-        "phonenumber",
-        "address",
-    ]
-    errors = {}
-
-    for field in fields:
-        if not data.get(field):
-            errors[f"{field}"] = f"The {field} field is missing or empty."
-    if errors:
-        return Response({"error": errors}, status=400)
-
-    if not isinstance(data["products"], list):
-        return Response({"error": "The products list is not a list."}, status=400)
-
-    if not isinstance(data["firstname"], str):
-        return Response({"error": "Firstname is not a valid string."}, status=400)
-
-    try:
-        phonenumber = phonenumbers.parse(data["phonenumber"], "RU")
-    except NumberParseException:
-        return Response({"error": "Invalid phone number"}, status=400)
-    if not is_valid_number(phonenumber):
-        return Response({"error": "Invalid phone number"}, status=400)
+    serializer = OrderSerializer(data=data)
+    serializer.is_valid(raise_exception=True)
 
     order = Order.objects.create(
-        address=data["address"],
-        firstname=data["firstname"],
-        lastname=data["lastname"],
-        phonenumber=data["phonenumber"],
+        address=serializer.validated_data["address"],
+        firstname=serializer.validated_data["firstname"],
+        lastname=serializer.validated_data["lastname"],
+        phonenumber=serializer.validated_data["phonenumber"],
     )
-    for product in data["products"]:
-        try:
-            order_item = Product.objects.get(id=product["product"])
-        except Product.DoesNotExist:
-            order.delete()
-            return Response({"error": "No product with such id"}, status=404)
-
+    for product in serializer.validated_data["products"]:
         OrderItem.objects.create(
-            product=order_item,
+            product=product["product"],
             order=order,
             quantity=product["quantity"],
         )
