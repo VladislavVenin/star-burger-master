@@ -2,6 +2,9 @@ from django.contrib import admin
 from django.shortcuts import reverse
 from django.templatetags.static import static
 from django.utils.html import format_html
+from django.utils.http import url_has_allowed_host_and_scheme as is_safe_url
+from django.http import HttpResponseRedirect
+from django.conf import settings
 
 from .models import Product
 from .models import ProductCategory
@@ -119,3 +122,14 @@ class OrderAdmin(admin.ModelAdmin):
     inlines = [OrderItemInline]
     readonly_fields = ['created_at']
     list_filter = ['is_closed']
+
+    def response_post_save_change(self, request, obj):
+        res = super().response_post_save_change(request, obj)
+        if "next" in request.GET:
+            next_url = request.GET["next"]
+            if is_safe_url(next_url, allowed_hosts=settings.ALLOWED_HOSTS):
+                return HttpResponseRedirect(next_url)
+            else:
+                return HttpResponseRedirect(reverse("start_page"))
+        else:
+            return res
