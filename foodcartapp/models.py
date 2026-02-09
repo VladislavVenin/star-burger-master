@@ -148,6 +148,7 @@ class Order(models.Model):
         default='new',
         db_index=True,
     )
+    notes = models.TextField("Комментарий", blank=True, null=True)
     created_at = models.DateTimeField('Заказ сформирован', auto_now_add=True)
 
     objects = OrderPriceQuerySet.as_manager()
