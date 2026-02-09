@@ -127,24 +127,27 @@ class RestaurantMenuItem(models.Model):
 
 class OrderPriceQuerySet(models.QuerySet):
     def get_price(self):
-        return self.values(
-            'id',
-            'address',
-            'firstname',
-            'lastname',
-            'phonenumber',
-            )\
-            .annotate(
+        return self.annotate(
                 total_price=Sum(F('products__quantity') * F('products__price'))
-            )
+            ).exclude(status='completed')
 
 
 class Order(models.Model):
+    STATUS_CHOICES = [
+        ('new', 'Необработан'),
+        ('in_progress', 'Обработан'),
+        ('completed', 'Завершён'),
+    ]
     address = models.CharField('Адрес', max_length=200, blank=False, null=False)
     firstname = models.CharField('Имя', max_length=50, blank=False, null=False)
     lastname = models.CharField('Фамилия', max_length=50, blank=True, null=True)
     phonenumber = PhoneNumberField('Телефон', region='RU',  blank=False, null=False)
-    is_closed = models.BooleanField('Заказ выполнен', default=False)
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default='new',
+        db_index=True,
+    )
     created_at = models.DateTimeField('Заказ сформирован', auto_now_add=True)
 
     objects = OrderPriceQuerySet.as_manager()

@@ -117,11 +117,11 @@ class OrderItemInline(admin.TabularInline):
 
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
-    list_display = ['address', 'phonenumber', 'is_closed']
-    list_editable = ['is_closed']
+    list_display = ['address', 'phonenumber', 'status']
+    list_editable = ['status']
     inlines = [OrderItemInline]
     readonly_fields = ['created_at']
-    list_filter = ['is_closed']
+    list_filter = ['status']
 
     def response_post_save_change(self, request, obj):
         res = super().response_post_save_change(request, obj)
