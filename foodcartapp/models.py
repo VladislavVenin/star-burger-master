@@ -148,8 +148,20 @@ class Order(models.Model):
         default='new',
         db_index=True,
     )
-    notes = models.TextField("Комментарий", blank=True, null=True)
+    payment = models.CharField(
+        'Способ оплаты',
+        max_length=20,
+        choices=[
+            ('none', 'Не выбран'),
+            ('epay', 'Электронно'),
+            ('cash', 'Наличностью'),
+        ],
+        default='none',
+    )
+    notes = models.TextField('Комментарий', blank=True, null=True)
     created_at = models.DateTimeField('Заказ сформирован', auto_now_add=True)
+    called_at = models.DateTimeField('Заказ обработан', blank=True, null=True, db_index=True,)
+    delivered_at = models.DateTimeField('Заказ доставлен', blank=True, null=True, db_index=True,)
 
     objects = OrderPriceQuerySet.as_manager()
 
@@ -158,7 +170,7 @@ class Order(models.Model):
         verbose_name_plural = 'Заказы'
 
     def __str__(self):
-        return f"[{self.created_at:%d.%m.%y} - {self.created_at:%H:%M}] - {self.address}"
+        return f'[{self.created_at:%d.%m.%y} - {self.created_at:%H:%M}] - {self.address}'
 
 
 class OrderItem(models.Model):
@@ -178,7 +190,7 @@ class OrderItem(models.Model):
     )
     quantity = models.PositiveIntegerField('Количество', default=0)
     price = models.DecimalField(
-        "Цена",
+        'Цена',
         max_digits=8,
         decimal_places=2,
         validators=[MinValueValidator(0)]
@@ -194,4 +206,4 @@ class OrderItem(models.Model):
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return f"{self.product.name} - {self.quantity}"
+        return f'{self.product.name} - {self.quantity}'
