@@ -125,11 +125,12 @@ class OrderAdmin(admin.ModelAdmin):
 
     def response_post_save_change(self, request, obj):
         res = super().response_post_save_change(request, obj)
-        if "next" in request.GET:
-            next_url = request.GET["next"]
-            if is_safe_url(next_url, allowed_hosts=settings.ALLOWED_HOSTS):
-                return HttpResponseRedirect(next_url)
-            else:
-                return HttpResponseRedirect(reverse("start_page"))
-        else:
+
+        if "next" not in request.GET:
             return res
+
+        next_url = request.GET["next"]
+        if is_safe_url(next_url, allowed_hosts=settings.ALLOWED_HOSTS):
+            return HttpResponseRedirect(next_url)
+        else:
+            return HttpResponseRedirect(reverse("start_page"))
