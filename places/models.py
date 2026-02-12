@@ -3,8 +3,8 @@ from django.db import models
 
 class Coordinates(models.Model):
     address = models.CharField('Адрес', max_length=200, blank=False, null=False, unique=True)
-    lat = models.DecimalField("Широта", max_digits=5, decimal_places=2)
-    lon = models.DecimalField("Долгота", max_digits=5, decimal_places=2)
+    lat = models.DecimalField("Широта", max_digits=5, decimal_places=2, null=True, blank=True)
+    lon = models.DecimalField("Долгота", max_digits=5, decimal_places=2, null=True, blank=True)
     created_at = models.DateTimeField('Создано', auto_now_add=True)
 
     class Meta:
