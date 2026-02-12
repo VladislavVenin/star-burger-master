@@ -122,7 +122,7 @@ def view_orders(request):
 
     for address in missing_addresses:
         try:
-            coords = fetch_coordinates(settings.YANDEX_API, address)
+            coords = fetch_coordinates(settings.YANDEX_API_KEY, address)
         except HTTPError:
             coords = None
         if coords:
