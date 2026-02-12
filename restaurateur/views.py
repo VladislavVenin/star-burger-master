@@ -104,8 +104,9 @@ def view_orders(request):
     current_url = request.path
 
     orders = Order.objects.prefetch_related('restaurant_branch')\
-        .manager_filter()\
-        .with_available_restaurants()
+        .exclude(status='completed')\
+        .add_total_price()\
+        .add_available_restaurants()
 
     addresses = set()
     for order in orders:

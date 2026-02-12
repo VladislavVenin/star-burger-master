@@ -126,12 +126,12 @@ class RestaurantMenuItem(models.Model):
 
 
 class OrderQuerySet(models.QuerySet):
-    def manager_filter(self):
+    def add_total_price(self):
         return self.annotate(
                 total_price=Sum(F('products__quantity') * F('products__price'))
-            ).prefetch_related('products__product').exclude(status='completed')
+            )
 
-    def with_available_restaurants(self):
+    def add_available_restaurants(self):
         restaurants = Restaurant.objects.prefetch_related(
             Prefetch(
                 'menu_items',
