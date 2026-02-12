@@ -161,7 +161,7 @@ class Order(models.Model):
     address = models.CharField('Адрес', max_length=200, blank=False, null=False)
     firstname = models.CharField('Имя', max_length=50, blank=False, null=False)
     lastname = models.CharField('Фамилия', max_length=50, blank=False, null=False)
-    phonenumber = PhoneNumberField('Телефон', region='RU',  blank=False, null=False)
+    phonenumber = PhoneNumberField('Телефон', region='RU',  blank=False, null=False, db_index=True)
     status = models.CharField(
         'Статус',
         max_length=20,
@@ -178,18 +178,17 @@ class Order(models.Model):
             ('cash', 'Наличностью'),
         ],
         default='none',
+        db_index=True
     )
     restaurant_branch = models.ForeignKey(
         Restaurant,
         verbose_name='Ресторан',
-        on_delete=models.CASCADE,
-        default=None,
-        blank=False,
+        on_delete=models.SET_NULL,
         null=True,
         related_name='orders',
     )
     notes = models.TextField('Комментарий', blank=True, null=True)
-    created_at = models.DateTimeField('Заказ сформирован', auto_now_add=True)
+    created_at = models.DateTimeField('Заказ сформирован', auto_now_add=True, db_index=True)
     called_at = models.DateTimeField('Заказ обработан', blank=True, null=True, db_index=True,)
     delivered_at = models.DateTimeField('Заказ доставлен', blank=True, null=True, db_index=True,)
 
@@ -218,7 +217,7 @@ class OrderItem(models.Model):
         verbose_name='заказ',
         db_index=True,
     )
-    quantity = models.PositiveIntegerField('Количество', default=0)
+    quantity = models.PositiveIntegerField('Количество', blank=False, null=False)
     price = models.DecimalField(
         'Цена',
         max_digits=8,
