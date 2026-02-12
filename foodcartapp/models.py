@@ -1,7 +1,7 @@
 from django.db import models
 from phonenumber_field.modelfields import PhoneNumberField
 from django.core.validators import MinValueValidator
-from django.db.models import F, Sum
+from django.db.models import Sum, F, Prefetch
 
 
 class Restaurant(models.Model):
@@ -125,11 +125,31 @@ class RestaurantMenuItem(models.Model):
         return f"{self.restaurant.name} - {self.product.name}"
 
 
-class OrderPriceQuerySet(models.QuerySet):
-    def get_price(self):
+class OrderQuerySet(models.QuerySet):
+    def manager_filter(self):
         return self.annotate(
                 total_price=Sum(F('products__quantity') * F('products__price'))
-            ).exclude(status='completed')
+            ).prefetch_related('products__product').exclude(status='completed')
+
+    def with_available_restaurants(self):
+        restaurants = Restaurant.objects.prefetch_related(
+            Prefetch(
+                'menu_items',
+                queryset=RestaurantMenuItem.objects.filter(availability=True),
+                to_attr='available_menu'
+            )
+        )
+
+        orders = self.prefetch_related('products__product').order_by('-status')
+
+        for order in orders:
+            order_product_ids = {item.product_id for item in order.products.all()}
+
+            order.available_restaurants = [
+                restaurant for restaurant in restaurants
+                if order_product_ids.issubset({item.product_id for item in restaurant.available_menu})
+            ]
+        return orders
 
 
 class Order(models.Model):
@@ -143,6 +163,7 @@ class Order(models.Model):
     lastname = models.CharField('Фамилия', max_length=50, blank=True, null=True)
     phonenumber = PhoneNumberField('Телефон', region='RU',  blank=False, null=False)
     status = models.CharField(
+        'Статус',
         max_length=20,
         choices=STATUS_CHOICES,
         default='new',
@@ -158,12 +179,21 @@ class Order(models.Model):
         ],
         default='none',
     )
+    restaurant_branch = models.ForeignKey(
+        Restaurant,
+        verbose_name='Ресторан',
+        on_delete=models.CASCADE,
+        default=None,
+        blank=False,
+        null=True,
+        related_name='orders',
+    )
     notes = models.TextField('Комментарий', blank=True, null=True)
     created_at = models.DateTimeField('Заказ сформирован', auto_now_add=True)
     called_at = models.DateTimeField('Заказ обработан', blank=True, null=True, db_index=True,)
     delivered_at = models.DateTimeField('Заказ доставлен', blank=True, null=True, db_index=True,)
 
-    objects = OrderPriceQuerySet.as_manager()
+    objects = OrderQuerySet.as_manager()
 
     class Meta:
         verbose_name = 'Заказ'

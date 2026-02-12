@@ -3,12 +3,15 @@ from django.shortcuts import redirect, render
 from django.views import View
 from django.urls import reverse_lazy
 from django.contrib.auth.decorators import user_passes_test
-
 from django.contrib.auth import authenticate, login
 from django.contrib.auth import views as auth_views
 
+from geopy import distance
+
 
 from foodcartapp.models import Product, Restaurant, Order
+from django.conf import settings
+from .utils import fetch_coordinates
 
 
 class Login(forms.Form):
@@ -92,8 +95,26 @@ def view_restaurants(request):
 
 @user_passes_test(is_manager, login_url='restaurateur:login')
 def view_orders(request):
-    orders = Order.objects.get_price()
+    key = settings.YANDEX_API
     current_url = request.path
+
+    orders = Order.objects.manager_filter().with_available_restaurants()
+
+    for order in orders:
+        distances = {}
+        for restaurant in order.available_restaurants:
+            try:
+                order_coords = fetch_coordinates(key, order.address)
+                restaurant_coords = fetch_coordinates(key, restaurant.address)
+            except requests.exceptions.HTTPError:
+                distances[restaurant] = "Ошибка при определении координат"
+            if order_coords is None or restaurant_coords is None:
+                distances[restaurant] = "Ошибка при определении координат"
+                continue
+            distances[restaurant] = round(distance.distance(order_coords, restaurant_coords).km, 2)
+
+        order.distances = dict(sorted(distances.items(), key=lambda item: item[1]))
+
     context = {
         "order_items": orders,
         "next": current_url,
