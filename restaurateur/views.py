@@ -13,7 +13,7 @@ from geopy import distance
 from foodcartapp.models import Product, Restaurant, Order
 from places.models import Coordinates
 from django.conf import settings
-from .utils import fetch_coordinates
+from places.utils import fetch_coordinates
 
 
 def get_coords_from_map(address, coords_map):
