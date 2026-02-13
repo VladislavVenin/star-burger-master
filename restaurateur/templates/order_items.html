@@ -50,13 +50,15 @@
         <td>
           {% if item.restaurant_branch %}
             {{item.restaurant_branch}}
-          {% else %}
+          {% elif item.coords_found %}
             <details>
               <summary><a>Может быть приготовлен ресторанами:</a></summary>
                 {% for restaurant, distance in item.distances.items %}
                   <li>{{ restaurant.name }} - {{ distance }} км.</li>
                 {% endfor %}
             </details>
+          {% else %}
+            Адрес не найден
           {% endif %}
         </td>
         <td><a href="{% url 'admin:foodcartapp_order_change' item.id %}?next={{ next|urlencode }}">Редактировать</a></td>

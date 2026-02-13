@@ -142,9 +142,8 @@ def view_orders(request):
         order_coords = get_coords_from_map(order.address, coords_map)
         for restaurant in order.available_restaurants:
             restaurant_coords = get_coords_from_map(restaurant.address, coords_map)
-            if restaurant_coords is None or order_coords is None:
-                distances[restaurant] = "Ошибка при определении координат"
-                continue
+            if restaurant_coords is not None and order_coords is not None:
+                order.coords_found = True
 
             distances[restaurant] = round(distance.distance(order_coords, restaurant_coords).km, 2)
         order.distances = dict(sorted(distances.items(), key=lambda item: item[1]))
