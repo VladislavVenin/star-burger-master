@@ -45,7 +45,7 @@ MIDDLEWARE = [
 ]
 
 ROLLBAR = {
-    'access_token': env('ROLLBAR_TOKEN'),
+    'access_token': env('ROLLBAR_TOKEN', ''),
     'environment': 'development' if DEBUG else 'production',
     'code_version': '1.0',
     'root': BASE_DIR,
@@ -134,4 +134,4 @@ STATICFILES_DIRS = [
     os.path.join(BASE_DIR, "bundles"),
 ]
 
-YANDEX_API_KEY = env('YANDEX_API_KEY')
+YANDEX_API_KEY = env('YANDEX_API_KEY', '')
