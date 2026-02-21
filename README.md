@@ -152,3 +152,24 @@ Parcel будет следить за файлами в каталоге `bundle
 - `YANDEX_API_KEY` — Ваш api ключ из [кабинета разработчика яндекс](https://developer.tech.yandex.ru/)
 - `ROLLBAR_TOKEN` — Ваш токен rollbar, подробнее [здесь](https://rollbar.com/)
 - `DB_URL` — ссылка на вашу БД в формате `scheme://user:password@host:port/database_name`
+
+## Деплой
+Для деплоя после каждого обновления проекта стоит создать скрипт который будет делать это за вас автоматически.
+Пример скрипта ниже работает в рамках Ubuntu 22.04.1 LTS (GNU/Linux 5.15.0-170-generic x86_64), а домашней директорией проекта является `/opt/star-burger-master/`
+```sh
+#!/bin/bash
+set -e # Упадёт, в случае ошибки, дальше не пойдёт
+
+git -C /opt/star-burger-master/ pull # Обновит код репозитория
+
+/opt/star-burger-master/venv/bin/pip install -r /opt/star-burger-master/requirements.txt # Установит библиотеки для Python
+npm --prefix /opt/star-burger-master/ install # Установит библиотеки для Node.js
+
+systemctl restart star-burger-node # Пересоберёт JS-код(star-burger-node.service запускает сборку Parcel как в примере выше)
+/opt/star-burger-master/venv/bin/python3 /opt/star-burger-master/manage.py collectstatic --noinput # Пересоберёт статику Django
+/opt/star-burger-master/venv/bin/python3 /opt/star-burger-master/manage.py makemigrations # Накатит миграции
+/opt/star-burger-master/venv/bin/python3 /opt/star-burger-master/manage.py migrate
+
+systemctl restart star-burger-py # Перезапустит сервис в котором запущено django-приложение
+echo Website successfully deployed # Сообщит об успешном завершении деплоя
+``` 
