@@ -149,3 +149,4 @@ Parcel будет следить за файлами в каталоге `bundle
 - `SECRET_KEY` — секретный ключ проекта. Он отвечает за шифрование на сайте. Например, им зашифрованы все пароли на вашем сайте.
 - `ALLOWED_HOSTS` — [см. документацию Django](https://docs.djangoproject.com/en/5.2/ref/settings/#allowed-hosts)
 - `YANDEX_API_KEY` — Ваш api ключ из [кабинета разработчика яндекс](https://developer.tech.yandex.ru/)
+- `ROLLBAR_TOKEN` — Ваш токен rollbar, подробнее [здесь](https://rollbar.com/)
