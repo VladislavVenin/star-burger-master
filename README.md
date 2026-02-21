@@ -56,6 +56,7 @@ pip install -r requirements.txt
 
 Определите переменные окружения. Создать файл `.env` в каталоге `star_burger/` и положите туда такой код:
 ```sh
+DB_URL= ссылка на вашу БД в формате `scheme://user:password@host:port/database_name`
 SECRET_KEY=django-insecure-0if40nf4nf93n4
 YANDEX_API_KEY=Ваш api ключ из кабинета разработчика яндекс(https://developer.tech.yandex.ru/)
 ```
@@ -150,3 +151,4 @@ Parcel будет следить за файлами в каталоге `bundle
 - `ALLOWED_HOSTS` — [см. документацию Django](https://docs.djangoproject.com/en/5.2/ref/settings/#allowed-hosts)
 - `YANDEX_API_KEY` — Ваш api ключ из [кабинета разработчика яндекс](https://developer.tech.yandex.ru/)
 - `ROLLBAR_TOKEN` — Ваш токен rollbar, подробнее [здесь](https://rollbar.com/)
+- `DB_URL` — ссылка на вашу БД в формате `scheme://user:password@host:port/database_name`
