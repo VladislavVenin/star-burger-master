@@ -160,16 +160,16 @@ Parcel будет следить за файлами в каталоге `bundle
 #!/bin/bash
 set -e # Упадёт, в случае ошибки, дальше не пойдёт
 
-git -C /opt/star-burger-master/ pull # Обновит код репозитория
+git pull # Обновит код репозитория
+. venv/bin/activate
+pip install -r requirements.txt # Установит библиотеки для Python
+npm install # Установит библиотеки для Node.js
 
-/opt/star-burger-master/venv/bin/pip install -r /opt/star-burger-master/requirements.txt # Установит библиотеки для Python
-npm --prefix /opt/star-burger-master/ install # Установит библиотеки для Node.js
-
-systemctl restart star-burger-node # Пересоберёт JS-код(star-burger-node.service запускает сборку Parcel как в примере выше)
-/opt/star-burger-master/venv/bin/python3 /opt/star-burger-master/manage.py collectstatic --noinput # Пересоберёт статику Django
-/opt/star-burger-master/venv/bin/python3 /opt/star-burger-master/manage.py makemigrations # Накатит миграции
-/opt/star-burger-master/venv/bin/python3 /opt/star-burger-master/manage.py migrate
+python ./manage.py collectstatic --noinput # Пересоберёт статику Django
+python ./manage.py makemigrations --dry-run --check 
+python ./manage.py migrate --noinput
 
 systemctl restart star-burger-py # Перезапустит сервис в котором запущено django-приложение
 echo Website successfully deployed # Сообщит об успешном завершении деплоя
+deactivate
 ``` 

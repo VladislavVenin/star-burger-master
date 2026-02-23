@@ -7,7 +7,7 @@ send_rollbar_deploy() {
     local comment=$2
     curl --request POST \
          --url https://api.rollbar.com/api/1/deploy \
-         --header 'X-Rollbar-Access-Token: 2d45d450fc4c46ba917967d3378ff0e4' \
+         --header 'X-Rollbar-Access-Token: 2d45d450fc4c46ba917967d3378ff0e4' \ # замените на свой токен 
          --header 'accept: application/json' \
          --header 'content-type: application/json' \
          --data "$(cat <<EOF
