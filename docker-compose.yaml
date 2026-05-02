@@ -1,0 +1,29 @@
+services:
+  frontend:
+    build: frontend
+    image: sb_frontend
+    volumes:
+      - ./bundles:/app/bundles-out
+    command: sh -c "mkdir -p /app/bundles-out && cp -r /app/bundles/* /app/bundles-out/"
+    
+  static:
+    build: .
+    image: sb_app
+    volumes:
+      - .:/opt/star-burger
+    depends_on:
+      frontend:
+        condition: service_completed_successfully
+
+  web:
+    image: sb_app
+    volumes:
+      - .:/opt/star-burger
+      - ./media:/opt/star-burger/media
+    # command: sh -c "gunicorn --bind 0.0.0.0:8000 star_burger.wsgi:application"
+    command: sh -c "python manage.py runserver 0.0.0.0:8000"
+    ports:
+      - 127.0.0.1:8080:8000
+    depends_on:
+      static:
+        condition: service_completed_successfully

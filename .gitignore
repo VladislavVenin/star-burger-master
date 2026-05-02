@@ -183,3 +183,4 @@ cython_debug/
 /node_modules
 /bundles
 /.parcel-cache
+/staticfiles

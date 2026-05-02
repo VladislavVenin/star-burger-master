@@ -138,11 +138,7 @@ Parcel будет следить за файлами в каталоге `bundle
 
 ## Как запустить prod-версию сайта
 
-Собрать фронтенд:
-
-```sh
-./node_modules/.bin/parcel build bundles-src/index.js --dist-dir bundles --public-url="./"
-```
+Проект будет собираться и запускаться в docker контейнерах.
 
 Настроить бэкенд: создать файл `.env` в каталоге `star_burger/` со следующими настройками:
 
@@ -151,7 +147,12 @@ Parcel будет следить за файлами в каталоге `bundle
 - `ALLOWED_HOSTS` — [см. документацию Django](https://docs.djangoproject.com/en/5.2/ref/settings/#allowed-hosts)
 - `YANDEX_API_KEY` — Ваш api ключ из [кабинета разработчика яндекс](https://developer.tech.yandex.ru/)
 - `ROLLBAR_TOKEN` — Ваш токен rollbar, подробнее [здесь](https://rollbar.com/)
-- `DB_URL` — ссылка на вашу БД в формате `scheme://user:password@host:port/database_name`
+
+Запустить docker контейнеры из директории проекта
+```sh
+docker compose up
+```
+После сборки сайт буде доступен на [http://127.0.0.1:8080/](http://127.0.0.1:8080/)
 
 ## Деплой
 Для деплоя после каждого обновления проекта стоит создать скрипт который будет делать это за вас автоматически.
