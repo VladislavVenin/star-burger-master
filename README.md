@@ -26,11 +26,11 @@ docker build -t sb_frontend ./frontend
 **Далее собранный фронтенд будет только раздаваться, чтобы собрать фронтенд заново пересоздайте образ**
 
 ### Как собрать бэкенд
-В файле `.env` укажите значение для `SECRET_KEY`
+В файле `.env` внутри корневого каталога укажите значение для `SECRET_KEY`
 
 Соберите образ с бэкендом
 ```sh
-docker build -t sb_app .
+docker build -t sb_app ./backend
 ```
 ### Запуск сайта
 
@@ -72,7 +72,7 @@ git pull # Обновит код репозитория
 docker image rm sb_frontend
 docker build -t sb_frontend ./frontend # Пересоберёт фронтенд
 docker image rm sb_app
-docker build -t sb_app . # Соберёт новый образ с новыми библиотеками
+docker build -t sb_app ./backend # Соберёт новый образ с новыми библиотеками
 docker compose up # Соберёт статику в отдельную папку и запустит сервер
 docker compose exec web python ./manage.py makemigrations --dry-run --check
 docker compose exec web python ./manage.py migrate --noinput
